@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace WordCloud
 {
@@ -17,8 +19,51 @@ namespace WordCloud
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            new Program().WordFrequencyAsync().Wait();
+            testingWordCloudGenerator();
+            // new Program().WordFrequencyAsync().Wait();
         }
+
+        public static void testingWordCloudGenerator()
+        {
+            Image newImage = Image.FromFile(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\cloud.png");
+            var wordCloud = new WordCloudSharp.WordCloud(200, 100, allowVerical: true, fontname: "YouYuan");
+            //WordCloudSharp.WordCloud wordCloud = new WordCloudSharp.WordCloud(100, 50, false, null, -1F, 1, newImage, false, null);
+            var xPalavras = new List<string>();
+            xPalavras.Add("hello");
+            xPalavras.Add("hi");
+            xPalavras.Add("carpool");
+            xPalavras.Add("california");
+            xPalavras.Add("health");
+            xPalavras.Add("book");
+            xPalavras.Add("journalism");
+            xPalavras.Add("notebook");
+            xPalavras.Add("university");
+            xPalavras.Add("venezia");
+            var xFrequencia = new List<Int32>();
+            xFrequencia.Add(408000);
+            xFrequencia.Add(72000);
+            xFrequencia.Add(10000);
+            xFrequencia.Add(200);
+            xFrequencia.Add(105000);
+            xFrequencia.Add(205000);
+            xFrequencia.Add(2200);
+            xFrequencia.Add(7500);
+            xFrequencia.Add(11600);
+            xFrequencia.Add(14000);
+
+            var image = wordCloud.Draw(xPalavras, xFrequencia);
+            // Save the bitmap as a JPEG file with quality level 75.
+            Bitmap myBitmap;
+            ImageCodecInfo myImageCodecInfo;
+            Encoder myEncoder = Encoder.Quality;
+            EncoderParameters myEncoderParameters;
+            myEncoderParameters = new EncoderParameters(1);
+            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 75L);
+            myEncoderParameters.Param[0] = myEncoderParameter;
+            // myImageCodecInfo = GetEncoderInfo("image/jpeg");
+            image.Save(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\Shapes075.jpg");
+        }
+        
 
         public IEnumerable<string> GetFilePaths(string root)
         {
