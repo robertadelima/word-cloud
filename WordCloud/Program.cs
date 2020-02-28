@@ -27,7 +27,7 @@ namespace WordCloud
 
         public static void testingWordCloudGenerator()
         {
-            Image newImage = Image.FromFile(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\cloud.png");
+            //Image newImage = Image.FromFile(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\cloud.png");
             var wordCloud = new WordCloudSharp.WordCloud(800, 500, allowVerical: true, fontname: "YouYuan");
             var image = wordCloud.Draw(topOccurencesWords, topOccurencesQuantity);
             // Save the bitmap as a JPEG file with quality level 75.
@@ -37,7 +37,7 @@ namespace WordCloud
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 75L);
             myEncoderParameters.Param[0] = myEncoderParameter;
             // myImageCodecInfo = GetEncoderInfo("image/jpeg");
-            image.Save(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\Shapes075.jpg");
+            image.Save(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\Gutenberg-Project-Word-Cloud.jpg");
         }
         
 
@@ -60,10 +60,15 @@ namespace WordCloud
                     foundTextStart = BookDisclaimerFilter.isBeginningOfDisclaimer(line);
                     continue;
                 }
+
+                foundTextEnd = BookDisclaimerFilter.isEndingOfDisclaimer(line);
+                if (foundTextEnd)
+                    break;
+                
                 var words = line
                     .Trim(new[] {'\n', '\r'})
                     .Split(new[] {' ', '.', ',', '!', '?', '"', '\'', '{', '}', ']', '[', '(', ')', '<', '>', ';', ':'},
-                           StringSplitOptions.RemoveEmptyEntries);
+                        StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var word in words.Select(word => word.ToLower())
                     .Where(p => StopWordFilter.isNotStopWord(p) && p.Length > 1))
