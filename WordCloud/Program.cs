@@ -51,8 +51,15 @@ namespace WordCloud
 
         public IEnumerable<string> GetWordsFromFile(string path)
         {
+            var foundTextStart = false;
+            var foundTextEnd = false;
             foreach (string line in File.ReadLines(path))
             {
+                if (foundTextStart == false)
+                {
+                    foundTextStart = BookDisclaimerFilter.isBeginningOfDisclaimer(line);
+                    continue;
+                }
                 var words = line
                     .Trim(new[] {'\n', '\r'})
                     .Split(new[] {' ', '.', ',', '!', '?', '"', '\'', '{', '}', ']', '[', '(', ')', '<', '>', ';', ':'},
@@ -106,7 +113,7 @@ namespace WordCloud
             }
         }
 
-        public void Bla(string filePath)
+        public void GetWordFrequencies(string filePath)
         {
             var fileWords = GetWordsFromFile(filePath);
             var fileWordFrequencies = BuildWordFrequency(fileWords);
@@ -118,10 +125,10 @@ namespace WordCloud
         {
             var executionBlock = new ActionBlock<string>
             (
-                Bla,
+                GetWordFrequencies,
                 new ExecutionDataflowBlockOptions {
-                    MaxDegreeOfParallelism = 4,
-                    BoundedCapacity = 4
+                    MaxDegreeOfParallelism = 8,
+                    BoundedCapacity = 8
                 }
             );
 
@@ -138,7 +145,6 @@ namespace WordCloud
 
             timer.Stop();
             Console.WriteLine("Completed in " + timer.Elapsed.ToString());
-            //PrintFrequenciesSorted();
             WriteTopOccurences();
         }
         
@@ -152,16 +158,6 @@ namespace WordCloud
                 .Select(p => p.Value).ToList();
             topOccurencesWords = Frequencies.OrderByDescending(key => key.Value).Take(50)
                 .Select(p => p.Key).ToList();
-        }
-        
-        public void PrintFrequenciesSorted()
-        {
-            Console.WriteLine("Total word count: " + TotalWordCount);
-            Console.WriteLine("Unique word count: " + Frequencies.Count);
-            foreach (var freq in Frequencies.OrderByDescending(key => key.Value).Take(10))
-            {
-                Console.WriteLine(freq.Key + ": " + freq.Value);
-            }
         }
     }
 }
