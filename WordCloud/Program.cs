@@ -19,8 +19,8 @@ namespace WordCloud
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            testingWordCloudGenerator();
-            // new Program().WordFrequencyAsync().Wait();
+            // testingWordCloudGenerator();
+            new Program().WordFrequencyAsync().Wait();
         }
 
         public static void testingWordCloudGenerator()
@@ -82,7 +82,8 @@ namespace WordCloud
                     .Split(new[] {' ', '.', ',', '!', '?', '"', '\'', '{', '}', ']', '[', '(', ')', '<', '>', ';', ':'},
                            StringSplitOptions.RemoveEmptyEntries);
 
-                foreach (var word in words.Select(word => word.ToLower()))
+                foreach (var word in words.Select(word => word.ToLower())
+                    .Where(p => StopWordFilter.isNotStopWord(p) && p.Length > 1))
                 {
                     yield return word;
                 }
