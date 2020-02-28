@@ -13,48 +13,24 @@ namespace WordCloud
     class Program
     {
         Dictionary<string, int> Frequencies = new Dictionary<string, int>();
+        private static List<int> topOccurencesQuantity;
+        private static List<string> topOccurencesWords;
         ulong TotalWordCount = 0;
         string Root = @"C:\Users\rober\RiderProjects\BooksAnalysis\BooksAnalysis\10k-livros";
 
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            // testingWordCloudGenerator();
             new Program().WordFrequencyAsync().Wait();
+            testingWordCloudGenerator();
         }
 
         public static void testingWordCloudGenerator()
         {
             Image newImage = Image.FromFile(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\cloud.png");
-            var wordCloud = new WordCloudSharp.WordCloud(200, 100, allowVerical: true, fontname: "YouYuan");
-            //WordCloudSharp.WordCloud wordCloud = new WordCloudSharp.WordCloud(100, 50, false, null, -1F, 1, newImage, false, null);
-            var xPalavras = new List<string>();
-            xPalavras.Add("hello");
-            xPalavras.Add("hi");
-            xPalavras.Add("carpool");
-            xPalavras.Add("california");
-            xPalavras.Add("health");
-            xPalavras.Add("book");
-            xPalavras.Add("journalism");
-            xPalavras.Add("notebook");
-            xPalavras.Add("university");
-            xPalavras.Add("venezia");
-            var xFrequencia = new List<Int32>();
-            xFrequencia.Add(408000);
-            xFrequencia.Add(72000);
-            xFrequencia.Add(10000);
-            xFrequencia.Add(200);
-            xFrequencia.Add(105000);
-            xFrequencia.Add(205000);
-            xFrequencia.Add(2200);
-            xFrequencia.Add(7500);
-            xFrequencia.Add(11600);
-            xFrequencia.Add(14000);
-
-            var image = wordCloud.Draw(xPalavras, xFrequencia);
+            var wordCloud = new WordCloudSharp.WordCloud(800, 500, allowVerical: true, fontname: "YouYuan");
+            var image = wordCloud.Draw(topOccurencesWords, topOccurencesQuantity);
             // Save the bitmap as a JPEG file with quality level 75.
-            Bitmap myBitmap;
-            ImageCodecInfo myImageCodecInfo;
             Encoder myEncoder = Encoder.Quality;
             EncoderParameters myEncoderParameters;
             myEncoderParameters = new EncoderParameters(1);
@@ -130,16 +106,6 @@ namespace WordCloud
             }
         }
 
-        public void PrintFrequenciesSorted()
-        {
-            Console.WriteLine("Total word count: " + TotalWordCount);
-            Console.WriteLine("Unique word count: " + Frequencies.Count);
-            foreach (var freq in Frequencies.OrderByDescending(key => key.Value).Take(10))
-            {
-                Console.WriteLine(freq.Key + ": " + freq.Value);
-            }
-        }
-
         public void Bla(string filePath)
         {
             var fileWords = GetWordsFromFile(filePath);
@@ -172,7 +138,30 @@ namespace WordCloud
 
             timer.Stop();
             Console.WriteLine("Completed in " + timer.Elapsed.ToString());
-            PrintFrequenciesSorted();
+            //PrintFrequenciesSorted();
+            WriteTopOccurences();
+        }
+        
+        public void WriteTopOccurences()
+        {
+            Console.WriteLine("Total word count: " + TotalWordCount);
+            Console.WriteLine("Unique word count: " + Frequencies.Count);
+            var filePath = Root + @"\word-analysis.csv";
+            File.WriteAllLines(filePath, Frequencies.Select(x =>  x.Value + ", " + x.Key));
+            topOccurencesQuantity = Frequencies.OrderByDescending(key => key.Value).Take(50)
+                .Select(p => p.Value).ToList();
+            topOccurencesWords = Frequencies.OrderByDescending(key => key.Value).Take(50)
+                .Select(p => p.Key).ToList();
+        }
+        
+        public void PrintFrequenciesSorted()
+        {
+            Console.WriteLine("Total word count: " + TotalWordCount);
+            Console.WriteLine("Unique word count: " + Frequencies.Count);
+            foreach (var freq in Frequencies.OrderByDescending(key => key.Value).Take(10))
+            {
+                Console.WriteLine(freq.Key + ": " + freq.Value);
+            }
         }
     }
 }
