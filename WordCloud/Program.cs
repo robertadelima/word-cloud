@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace WordCloud
@@ -13,31 +12,28 @@ namespace WordCloud
     class Program
     {
         Dictionary<string, int> Frequencies = new Dictionary<string, int>();
-        private static List<int> topOccurencesQuantity;
-        private static List<string> topOccurencesWords;
+        private static List<int> _topOccurencesQuantity;
+        private static List<string> _topOccurencesWords;
         ulong TotalWordCount = 0;
-        string Root = @"C:\Users\rober\RiderProjects\BooksAnalysis\BooksAnalysis\10k-livros";
+        string Root = @"C:\Users\rober\RiderProjects\WordCloud\WordCloud\data";
 
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
             new Program().WordFrequencyAsync().Wait();
-            testingWordCloudGenerator();
+            WordCloudGenerator();
         }
 
-        public static void testingWordCloudGenerator()
+        public static void WordCloudGenerator()
         {
-            //Image newImage = Image.FromFile(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\cloud.png");
             var wordCloud = new WordCloudSharp.WordCloud(800, 500, allowVerical: true, fontname: "YouYuan");
-            var image = wordCloud.Draw(topOccurencesWords, topOccurencesQuantity);
-            // Save the bitmap as a JPEG file with quality level 75.
+            var image = wordCloud.Draw(_topOccurencesWords, _topOccurencesQuantity);
             Encoder myEncoder = Encoder.Quality;
             EncoderParameters myEncoderParameters;
             myEncoderParameters = new EncoderParameters(1);
             EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 75L);
             myEncoderParameters.Param[0] = myEncoderParameter;
-            // myImageCodecInfo = GetEncoderInfo("image/jpeg");
-            image.Save(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\Gutenberg-Project-Word-Cloud.jpg");
+            image.Save(@"C:\Users\rober\RiderProjects\WordCloud\WordCloud\Result-WordCloud.jpg");
         }
         
 
@@ -52,7 +48,7 @@ namespace WordCloud
         public IEnumerable<string> GetWordsFromFile(string path)
         {
             var foundTextStart = false;
-            var foundTextEnd = false;
+            bool foundTextEnd;
             foreach (string line in File.ReadLines(path))
             {
                 if (foundTextStart == false)
@@ -157,11 +153,14 @@ namespace WordCloud
         {
             Console.WriteLine("Total word count: " + TotalWordCount);
             Console.WriteLine("Unique word count: " + Frequencies.Count);
-            var filePath = Root + @"\word-analysis.csv";
-            File.WriteAllLines(filePath, Frequencies.Select(x =>  x.Value + ", " + x.Key));
-            topOccurencesQuantity = Frequencies.OrderByDescending(key => key.Value).Take(50)
+            var filePath = @"C:\Users\rober\RiderProjects\WordCloud\WordCloud\word-analysis.csv";
+            
+            File.WriteAllLines(filePath, Frequencies.OrderByDescending(x => x.Value).Take(50)
+                .Select(x =>  x.Value + ", " + x.Key));
+            
+            _topOccurencesQuantity = Frequencies.OrderByDescending(key => key.Value).Take(50)
                 .Select(p => p.Value).ToList();
-            topOccurencesWords = Frequencies.OrderByDescending(key => key.Value).Take(50)
+            _topOccurencesWords = Frequencies.OrderByDescending(key => key.Value).Take(50)
                 .Select(p => p.Key).ToList();
         }
     }
